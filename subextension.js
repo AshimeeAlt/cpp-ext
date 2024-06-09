@@ -27,7 +27,7 @@
     wasm.instance.exports.free_memory_for_string(ptr);
   }
 
-  // Our dynamically added WASM (replaced /*__wasmOverride*/ with the WASM)
+  // Our dynamically added WASM (replaced __wasmOverride with the WASM)
   const WASM = new Uint8Array(/*__wasmOverride*/);
 
   // Setup object
