@@ -27,6 +27,6 @@ WASM_EXPORT extension getInfo() {
 }
 
 // Blocks
-WASM_EXPORT int add(int a, int b) {
+WASM_EXPORT float add(float a, float b) {
   return a + b;
 }
