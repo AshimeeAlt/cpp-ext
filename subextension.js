@@ -1,5 +1,8 @@
-console.clear();
 (async function(Scratch) {
+  if (!Scratch.extensions.unsandboxed) {
+    throw new Error(`"Build" needs to be ran unsandboxed!`);
+  }
+
   let wasm;
   // Utilities
   function get_memory() {
@@ -24,10 +27,10 @@ console.clear();
     wasm.instance.exports.free_memory_for_string(ptr);
   }
 
-  // WASM
+  // Our dynamically added WASM (replaced /*__wasmOverride*/ with the WASM)
   const WASM = new Uint8Array(/*__wasmOverride*/);
 
-  // Running the WASM
+  // Setup object
   const importObject = {
     env: {
       print_string: function(str) {
@@ -38,11 +41,8 @@ console.clear();
       },
     }
   };
-  function readStr(memory, offset, size) {
-    let str = '';
-    for (let i = 0; i < size; i++) str += String.fromCharCode(memory.getUint8(offset + i));
-    return str;
-  }
+
+  // Run that WASM!
   WebAssembly.instantiate(WASM, importObject).then((obj) => {
     wasm = obj;
     const __extension = wasm.instance.exports;
@@ -50,17 +50,19 @@ console.clear();
       __ops: ['add'],
       __getInfo: __extension.getInfo,
       getInfo() {
+        // For later
         const info = this.__getInfo();
         console.log(info);
+        // Return our cheated info
         return {
           id: '0znzwTest',
-          name: 'test',
+          name: 'Runs using WASM',
           blocks: [{
             opcode: 'add',
-            text: 'WASM [A] + [B]',
+            text: '[_1_A] + [_2_B]',
             arguments: {
-              A: {type: 'number'},
-              B: {type: 'number'},
+              _1_A: {type: 'number'},
+              _2_B: {type: 'number'},
             },
             blockType: 'reporter',
           }],
@@ -68,16 +70,22 @@ console.clear();
         // return info;
       },
     };
+    // Copy the props over
     for (const prop of Object.keys(__extension)) {
+      // Skip getInfo
       if (prop !== 'getInfo') {
+        // If this is a block just make a wrapper for it
         if (extension.__ops.includes(prop)) {
           const oProp = __extension[prop];
           extension[prop] = function(args) {
+            // Just assume its in the correct order :skull:
             return oProp(...Object.values(args));
           }
+          // Not a block so we can just assign it :yawn:
         } else extension[prop] = __extension[prop];
       }
     }
+    // Register the extension
     Scratch.extensions.register(extension);
   });
 })(Scratch);

@@ -5,9 +5,12 @@
 
 // Main extension
 WASM_EXPORT int main() {
-  print_string("Extension in C++ by Ashimee\n");
+  print_string("Hello from WASM!\nExtension in C++ by Ashimee\n");
   return 0;
 }
+
+/*
+// Not implemented cause im stupid
 struct extension
 {
   char* id = "";
@@ -17,20 +20,13 @@ struct extension
   char* color3 = "#0000ff";
 };
 
-int infosize;
-int infoalign;
-WASM_EXPORT int getInfoSize() {
-  return infosize;
-}
-WASM_EXPORT int getInfoAlign() {
-  return infoalign;
-}
 extension makeInfo(char* id, char* name) {
   return (extension){id, name};
 }
 WASM_EXPORT extension getInfo() {
   return makeInfo("0znzwTest", "WASM");
 }
+*/
 WASM_EXPORT int add(int a, int b) {
   return a + b;
 }
