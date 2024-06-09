@@ -1,0 +1,4 @@
+library.o
+library.wasm
+package-lock.json
+extension.js
