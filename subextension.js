@@ -42,50 +42,44 @@
     }
   };
 
+  function Mini(extensionInfo, exports) {
+    this.register = () => Scratch.extensions.register(this);
+    this.getInfo = function() {
+      return extensionInfo;
+    };
+    extensionInfo.blocks = [];
+    this.addBlock = function(blockInfo, fn) {
+      blockInfo.func = blockInfo?.func ?? blockInfo?.opcode;
+      if (typeof fn === 'string') {
+        fn = exports[fn];
+      }
+      this[blockInfo.func] = function(args) {
+        return fn(...(Object.values(args)));
+      };
+      extensionInfo.blocks.push(blockInfo);
+    }
+  }
+
   // Run that WASM!
   WebAssembly.instantiate(WASM, importObject).then((obj) => {
     wasm = obj;
     const __extension = wasm.instance.exports;
-    const extension = {
-      __ops: ['add'],
-      __getInfo: __extension.getInfo,
-      getInfo() {
-        // For later
-        const info = this.__getInfo();
-        console.log(info);
-        // Return our cheated info
-        return {
-          id: '0znzwTest',
-          name: 'Runs using WASM',
-          blocks: [{
-            opcode: 'add',
-            text: '[_1_A] + [_2_B]',
-            arguments: {
-              _1_A: {type: 'number'},
-              _2_B: {type: 'number'},
-            },
-            blockType: 'reporter',
-          }],
-        }
-        // return info;
+    // Create our extension
+    const extension = new Mini({
+      id: '0znzwMadeInWASM',
+      name: 'Runs under WASM',
+    }, __extension);
+    // Add our blocks
+    extension.addBlock({
+      opcode: 'add',
+      text: '[_1_A] + [_2_B]',
+      arguments: {
+        _1_A: {type: Scratch.ArgumentType.NUMBER},
+        _2_B: {type: Scratch.ArgumentType.NUMBER},
       },
-    };
-    // Copy the props over
-    for (const prop of Object.keys(__extension)) {
-      // Skip getInfo
-      if (prop !== 'getInfo') {
-        // If this is a block just make a wrapper for it
-        if (extension.__ops.includes(prop)) {
-          const oProp = __extension[prop];
-          extension[prop] = function(args) {
-            // Just assume its in the correct order :skull:
-            return oProp(...Object.values(args));
-          }
-          // Not a block so we can just assign it :yawn:
-        } else extension[prop] = __extension[prop];
-      }
-    }
+      blockType: Scratch.BlockType.REPORTER,
+    }, 'add');
     // Register the extension
-    Scratch.extensions.register(extension);
+    extension.register();
   });
 })(Scratch);
