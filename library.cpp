@@ -9,7 +9,6 @@ WASM_EXPORT int main() {
   return 0;
 }
 
-/*
 // Not implemented cause im stupid
 struct extension
 {
@@ -26,7 +25,8 @@ extension makeInfo(char* id, char* name) {
 WASM_EXPORT extension getInfo() {
   return makeInfo("0znzwTest", "WASM");
 }
-*/
+
+// Blocks
 WASM_EXPORT int add(int a, int b) {
   return a + b;
 }
